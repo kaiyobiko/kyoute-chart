@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共通テスト点数グラフ化フォーム</title>
+    <!-- グラフを描画するためのライブラリ (Chart.js) -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        h1 { text-align: center; font-size: 1.5rem; margin-bottom: 20px; color: #2c3e50; }
+        .input-group { margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+        label { font-weight: bold; width: 40%; }
+        input[type="number"] { width: 55%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; text-align: right; }
+        button { width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+        button:hover { background-color: #2980b9; }
+        .chart-container { margin-top: 30px; position: relative; width: 100%; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>共通テスト 自己採点</h1>
+    
+    <!-- 点数入力フォーム -->
+    <div id="scoreForm">
+        <div class="input-group"><label>国語 (200点)</label><input type="number" id="kokugo" min="0" max="200" placeholder="0"></div>
+        <div class="input-group"><label>数学ⅠA (100点)</label><input type="number" id="su1a" min="0" max="100" placeholder="0"></div>
+        <div class="input-group"><label>数学ⅡBC (100点)</label><input type="number" id="su2bc" min="0" max="100" placeholder="0"></div>
+        <div class="input-group"><label>英語R (100点)</label><input type="number" id="eigoR" min="0" max="100" placeholder="0"></div>
+        <div class="input-group"><label>英語L (100点)</label><input type="number" id="eigoL" min="0" max="100" placeholder="0"></div>
+        
+        <button type="button" onclick="generateChart()">円グラフを作成する</button>
+    </div>
+
+    <!-- グラフ表示エリア -->
+    <div class="chart-container" id="chartArea">
+        <canvas id="myPieChart"></canvas>
+    </div>
+</div>
+
+<script>
+let myChart = null;
+
+function generateChart() {
+    // 各フォームから数値を取得（空欄なら0点にする）
+    const kokugo = parseFloat(document.getElementById('kokugo').value) || 0;
+    const su1a = parseFloat(document.getElementById('su1a').value) || 0;
+    const su2bc = parseFloat(document.getElementById('su2bc').value) || 0;
+    const eigoR = parseFloat(document.getElementById('eigoR').value) || 0;
+    const eigoL = parseFloat(document.getElementById('eigoL').value) || 0;
+
+    // グラフを表示するエリアを可視化
+    document.getElementById('chartArea').style.display = 'block';
+
+    // 既にグラフが作られていたら一度破棄する（再入力に対応するため）
+    if (myChart !== null) {
+        myChart.destroy();
+    }
+
+    // Chart.jsで円グラフを描画
+    const ctx = document.getElementById('myPieChart').getContext('2d');
+    myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['国語', '数学ⅠA', '数学ⅡBC', '英語R', '英語L'],
+            datasets: [{
+                data: [kokugo, su1a, su2bc, eigoR, eigoL],
+                backgroundColor: [
+                    '#e74c3c', // 国語：赤
+                    '#3498db', // 数学1A：青
+                    '#2980b9', // 数学2BC：濃い青
+                    '#2ecc71', // 英語R：緑
+                    '#27ae60'  // 英語L：濃い緑
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: true, text: '得点バランス（比率）' }
+            }
+        }
+    });
+    
+    // グラフの位置まで自動スクロール
+    document.getElementById('chartArea').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
